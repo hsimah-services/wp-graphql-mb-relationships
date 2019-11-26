@@ -1,10 +1,5 @@
 <?php
 
-use WPGraphQL\Data\DataSource;
-use WPGraphQL\Data\Connection\PostObjectConnectionResolver;
-use WPGraphQL\Connection\PostObjects;
-use WPGraphQL\Type\WPEnumType;
-
 final class WPGraphQL_MB_Relationships {
 
     /**
@@ -74,8 +69,22 @@ final class WPGraphQL_MB_Relationships {
      * @return void
      */
     public static function register( $settings ) {
+
       // register relationship with MB Relationships
       MB_Relationships_API::register( $settings );
+      // register graphql connection
+      self::register_connection( $settings );
+
+    }
+
+    /**
+     * Register WPGraphQL MB Relationships config.
+     *
+     * @access public
+     * @since  0.0.1
+     * @return void
+     */
+    public static function register_connection( $settings ) {
 
       // register graphql connection
       $from_post_type = $settings['from']['post_type'];
@@ -117,7 +126,9 @@ final class WPGraphQL_MB_Relationships {
      * @return void
      */
     private function init() {
-        $this->register_output_types();
+
+      add_action( 'mb_relationships_registered', [ $this, 'register_connection' ], 10 );
+
     }
 
 }
