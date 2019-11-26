@@ -78,7 +78,35 @@ final class WPGraphQL_MB_Relationships {
       MB_Relationships_API::register( $settings );
 
       // register graphql connection
-      // TODO register_graphql_connection
+      $from_post_type = $settings['from']['post_type'];
+      $from_post_object = get_post_type_object( $from_post_type );
+      $from_connection_name = $settings['from']['meta_box']['graphql_name'];
+      $to_post_type = $setttings['to']['post_type'];
+      $to_post_object = get_post_type_object( $to_post_type );
+      $to_connection_name = $settings['to']['meta_box']['graphql_name'];
+
+      if ( true === $from_post_object->show_in_graphql && true === $to_post_object->show_in_graphql ) {
+
+        register_graphql_connection(
+          self::get_connection_config(
+            [
+              'fromType'      => $from_post_object->graphql_single_name,
+              'toType'        => $to_post_object->graphql_single_name,
+              'fromFieldName' => $from_connection_name,
+            ]
+          )
+        );
+
+        register_graphql_connection(
+          self::get_connection_config(
+            [
+              'fromType'      => $to_post_object->graphql_single_name,
+              'toType'        => $from_post_object->graphql_single_name,
+              'fromFieldName' => $to_connection_name,
+            ]
+          )
+        );
+      }
     }
 
     /**
