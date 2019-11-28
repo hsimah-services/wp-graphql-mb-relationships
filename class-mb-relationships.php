@@ -1,5 +1,8 @@
 <?php
 
+use WPGraphQL\Data\DataSource;
+use WPGraphQL\Data\Connection\PostObjectConnectionResolver;
+
 final class WPGraphQL_MB_Relationships {
 
     /**
@@ -85,36 +88,65 @@ final class WPGraphQL_MB_Relationships {
      * @return void
      */
     public static function register_connection( $settings ) {
-
-      // register graphql connection
-      $from_post_type = $settings['from']['post_type'];
+      
+      $from_post_type = $settings['from']['field']['post_type'];
       $from_post_object = get_post_type_object( $from_post_type );
-      $from_connection_name = $settings['from']['meta_box']['graphql_name'];
-      $to_post_type = $setttings['to']['post_type'];
+      $from_connection_name = $settings['from']['graphql_name'];
+      $to_post_type = $settings['to']['field']['post_type'];
       $to_post_object = get_post_type_object( $to_post_type );
-      $to_connection_name = $settings['to']['meta_box']['graphql_name'];
-
-      if ( true === $from_post_object->show_in_graphql && true === $to_post_object->show_in_graphql ) {
-
-        register_graphql_connection(
-          self::get_connection_config(
+      $to_connection_name = $settings['to']['graphql_name'];
+     
+      if ( $settings['from']['show_in_graphql'] ) {
+        if ( $from_post_object->show_in_graphql ) {
+  
+          register_graphql_connection(
             [
               'fromType'      => $from_post_object->graphql_single_name,
               'toType'        => $to_post_object->graphql_single_name,
               'fromFieldName' => $from_connection_name,
+              'resolveNode'   => function( $id, $args, $context, $info ) {
+                return ! empty( $id ) ? DataSource::resolve_post_object( $id, $context ) : null;
+              },
+              'resolve'       => function ( $root, $args, $context, $info ) use ( $from_post_type, $settings ) {
+                $resolver = new PostObjectConnectionResolver( $root, $args, $context, $info, $from_post_type );
+                $resolver->setQueryArg( 'relationship' , [
+                  'from'  => $root->ID,
+                  'id'    => $settings['id'],
+                ] );
+                // Meta Box does not want post_parent set
+                $resolver->setQueryArg( 'post_parent', null );
+                
+                return $resolver->get_connection();
+              }
             ]
-          )
-        );
+          );
+        }
+      }
 
-        register_graphql_connection(
-          self::get_connection_config(
+      if ( $settings['to']['show_in_graphql'] ) {
+        if ( $to_post_object->show_in_graphql ) {
+          register_graphql_connection(
             [
               'fromType'      => $to_post_object->graphql_single_name,
               'toType'        => $from_post_object->graphql_single_name,
               'fromFieldName' => $to_connection_name,
+              'resolveNode'   => function( $id, $args, $context, $info ) {
+                return ! empty( $id ) ? DataSource::resolve_post_object( $id, $context ) : null;
+              },
+              'resolve'       => function ( $root, $args, $context, $info ) use ( $to_post_type, $settings ) {
+                $resolver = new PostObjectConnectionResolver( $root, $args, $context, $info, $to_post_type );
+                $resolver->setQueryArg( 'relationship' , [
+                  'to' => $root->ID,
+                  'id' => $settings['id'],
+                ] );
+                // Meta Box does not want post_parent set
+                $resolver->setQueryArg( 'post_parent', null );
+                
+                return $resolver->get_connection();
+              }
             ]
-          )
-        );
+          );
+        }
       }
     }
 
@@ -127,13 +159,13 @@ final class WPGraphQL_MB_Relationships {
      */
     private function init() {
 
-      add_action( 'mb_relationships_registered', [ $this, 'register_connection' ], 10 );
+      add_action( 'mb_relationships_registered', [ 'WPGraphQL_MB_Relationships', 'register_connection' ], 1 );
 
     }
 
 }
 
-add_action( 'init', 'WPGraphQL_MB_Relationships_init' );
+add_action( 'mb_relationships_init', 'WPGraphQL_MB_Relationships_init' );
 
 if ( ! function_exists( 'WPGraphQL_MB_Relationships_init' ) ) {
     /**
@@ -148,13 +180,4 @@ if ( ! function_exists( 'WPGraphQL_MB_Relationships_init' ) ) {
          */
         return \WPGraphQL_MB_Relationships::instance();
     }
-}
-
-/**
- * Register a WPGraphQL aware MB Relationship
- *
- * @param array $settings Relationship parameters.
- */
-function register_graphql_mb_relationship_type( $settings ) {
-    \WPGraphQL_MB_Relationships::register( $settings );
 }
