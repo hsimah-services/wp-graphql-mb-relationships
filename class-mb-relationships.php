@@ -104,14 +104,14 @@ final class WPGraphQL_MB_Relationships {
             'fromType'      => $from_post_object->graphql_single_name,
             'toType'        => $to_post_object->graphql_single_name,
             'fromFieldName' => $from_connection_name,
-            'resolveNode'       => function( $id, $args, $context, $info ) {
+            'resolveNode'   => function( $id, $args, $context, $info ) {
               return ! empty( $id ) ? DataSource::resolve_post_object( $id, $context ) : null;
             },
             'resolve'       => function ( $root, $args, $context, $info ) use ( $from_post_type, $settings ) {
-              $resolver   = new PostObjectConnectionResolver( $root, $args, $context, $info, $from_post_type );
+              $resolver = new PostObjectConnectionResolver( $root, $args, $context, $info, $from_post_type );
               $resolver->setQueryArg( 'relationship' , [
-                'from' => $root->ID,
-                'id' => $settings['id'],
+                'from'  => $root->ID,
+                'id'    => $settings['id'],
               ] );
               
               return $resolver->get_connection();
@@ -126,11 +126,11 @@ final class WPGraphQL_MB_Relationships {
             'fromType'      => $to_post_object->graphql_single_name,
             'toType'        => $from_post_object->graphql_single_name,
             'fromFieldName' => $to_connection_name,
-            'resolveNode'       => function( $id, $args, $context, $info ) {
+            'resolveNode'   => function( $id, $args, $context, $info ) {
               return ! empty( $id ) ? DataSource::resolve_post_object( $id, $context ) : null;
             },
             'resolve'       => function ( $root, $args, $context, $info ) use ( $to_post_type, $settings ) {
-              $resolver   = new PostObjectConnectionResolver( $root, $args, $context, $info, $to_post_type );
+              $resolver = new PostObjectConnectionResolver( $root, $args, $context, $info, $to_post_type );
               $resolver->setQueryArg( 'relationship' , [
                 'to' => $root->ID,
                 'id' => $settings['id'],
