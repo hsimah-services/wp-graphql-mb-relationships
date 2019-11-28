@@ -71,22 +71,6 @@ final class WPGraphQL_MB_Relationships {
      * @since  0.0.1
      * @return void
      */
-    public static function register( $settings ) {
-
-      // register relationship with MB Relationships
-      MB_Relationships_API::register( $settings );
-      // register graphql connection
-      self::register_connection( $settings );
-
-    }
-
-    /**
-     * Register WPGraphQL MB Relationships config.
-     *
-     * @access public
-     * @since  0.0.1
-     * @return void
-     */
     public static function register_connection( $settings ) {
       
       $from_post_type = $settings['from']['field']['post_type'];
