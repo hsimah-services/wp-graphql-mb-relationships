@@ -72,36 +72,44 @@ final class WPGraphQL_MB_Relationships
    */
   public static function register_connection($settings)
   {
-    $from_post_type = $settings['from']['field']['post_type'];
-    $from_post_object = get_post_type_object($from_post_type);
-    $from_connection_name = $settings['from']['graphql_name'];
-    $to_post_type = $settings['to']['field']['post_type'];
-    $to_post_object = get_post_type_object($to_post_type);
-    $to_connection_name = $settings['to']['graphql_name'];
+    add_action('graphql_register_types', function () use ($settings) {
+      $resolver = WPGraphQL_MB_Relationships::instance();
 
-    if ($from_post_object !== null && $from_post_object->show_in_graphql) {
-      register_graphql_connection(
-        [
-          'fromType'      => $from_post_object->graphql_single_name,
-          'toType'        => $to_post_object->graphql_single_name,
-          'fromFieldName' => $from_connection_name,
-          'resolveNode'   => $this->get_node_resolver(),
-          'resolve'       => $this->get_resolver($from_post_type, $settings['id']),
-        ]
-      );
-    }
+      $from_post_type = $settings['from']['field']['post_type'];
+      $from_post_object = get_post_type_object($from_post_type);
+      $from_connection_name = $settings['from']['graphql_name'];
+      $from_connection_args = $settings['from']['graphql_args'];
+      $to_post_type = $settings['to']['field']['post_type'];
+      $to_post_object = get_post_type_object($to_post_type);
+      $to_connection_name = $settings['to']['graphql_name'];
+      $to_connection_args = $settings['to']['graphql_args'];
 
-    if ($to_post_object !== null && $to_post_object->show_in_graphql) {
-      register_graphql_connection(
-        [
-          'fromType'      => $to_post_object->graphql_single_name,
-          'toType'        => $from_post_object->graphql_single_name,
-          'fromFieldName' => $to_connection_name,
-          'resolveNode'   => $this->get_node_resolver(),
-          'resolve'       => $this->get_resolver($to_post_type, $settings['id']),
-        ]
-      );
-    }
+      if ($from_post_object !== null && $from_post_object->show_in_graphql) {
+        register_graphql_connection(
+          [
+            'fromType'        => $from_post_object->graphql_single_name,
+            'toType'          => $to_post_object->graphql_single_name,
+            'fromFieldName'   => $from_connection_name,
+            'connectionArgs'  => isset($from_connection_args) ? $from_connection_args : [],
+            'resolveNode'     => $resolver->get_node_resolver(),
+            'resolve'         => $resolver->get_resolver($from_post_type, $settings['id']),
+          ]
+        );
+      }
+
+      if ($to_post_object !== null && $to_post_object->show_in_graphql) {
+        register_graphql_connection(
+          [
+            'fromType'        => $to_post_object->graphql_single_name,
+            'toType'          => $from_post_object->graphql_single_name,
+            'fromFieldName'   => $to_connection_name,
+            'connectionArgs'  => isset($to_connection_args) ? $to_connection_args : [],
+            'resolveNode'     => $resolver->get_node_resolver(),
+            'resolve'         => $resolver->get_resolver($to_post_type, $settings['id']),
+          ]
+        );
+      }
+    });
   }
 
   /**
