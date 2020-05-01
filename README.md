@@ -17,7 +17,7 @@ MB_Relationships_API::register( [
       'show_in_graphql' => true,
       'graphql_name' => 'goingUp',
       'graphql_args' => [
-				'higher' => [
+        'higher' => [
 					'type' => 'Boolean',
 					'description' => 'Field Description',
 				],
@@ -43,6 +43,3 @@ MB_Relationships_API::register( [
   ]
 ); 
 ```
-
-`show_in_graphql` will tell the plugin to create the connection.
-`graphql_name` sets the connection name in the schema.
