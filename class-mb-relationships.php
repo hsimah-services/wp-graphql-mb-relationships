@@ -75,6 +75,9 @@ final class WPGraphQL_MB_Relationships
     add_action('graphql_register_types', function () use ($settings) {
       $resolver = WPGraphQL_MB_Relationships::instance();
 
+      $show_to = $settings['to']['show_in_graphql'];
+      $show_from = $settings['from']['show_in_graphql'];
+
       $from_post_type = $settings['from']['field']['post_type'];
       $from_post_object = get_post_type_object($from_post_type);
       $from_connection_name = $settings['from']['graphql_name'];
@@ -84,7 +87,7 @@ final class WPGraphQL_MB_Relationships
       $to_connection_name = $settings['to']['graphql_name'];
       $to_connection_args = $settings['to']['graphql_args'];
 
-      if ($from_post_object !== null && $from_post_object->show_in_graphql) {
+      if ($show_to && $from_post_object !== null && $from_post_object->show_in_graphql) {
         register_graphql_connection(
           [
             'fromType'        => $from_post_object->graphql_single_name,
@@ -92,12 +95,12 @@ final class WPGraphQL_MB_Relationships
             'fromFieldName'   => $from_connection_name,
             'connectionArgs'  => isset($from_connection_args) ? $from_connection_args : [],
             'resolveNode'     => $resolver->get_node_resolver(),
-            'resolve'         => $resolver->get_resolver($from_post_type, $settings['id']),
+            'resolve'         => $resolver->get_resolver($to_post_type, $settings['id'], 'from'),
           ]
         );
       }
 
-      if ($to_post_object !== null && $to_post_object->show_in_graphql) {
+      if ($show_from && $to_post_object !== null && $to_post_object->show_in_graphql) {
         register_graphql_connection(
           [
             'fromType'        => $to_post_object->graphql_single_name,
@@ -105,7 +108,7 @@ final class WPGraphQL_MB_Relationships
             'fromFieldName'   => $to_connection_name,
             'connectionArgs'  => isset($to_connection_args) ? $to_connection_args : [],
             'resolveNode'     => $resolver->get_node_resolver(),
-            'resolve'         => $resolver->get_resolver($to_post_type, $settings['id']),
+            'resolve'         => $resolver->get_resolver($from_post_type, $settings['id'], 'to'),
           ]
         );
       }
@@ -121,8 +124,8 @@ final class WPGraphQL_MB_Relationships
    */
   private function get_node_resolver()
   {
-    return function ($id, $args, $context, $info) {
-      return !empty($id) ? DataSource::resolve_post_object($id, $context) : null;
+    return function ($node, $args, $context, $info) {
+      return !empty($node) ? DataSource::resolve_post_object($node->ID, $context) : null;
     };
   }
 
@@ -133,12 +136,12 @@ final class WPGraphQL_MB_Relationships
    * @since  0.1.0
    * @return function
    */
-  private function get_resolver($post_type, $id)
+  private function get_resolver($post_type_name, $id, $relationship)
   {
-    return function ($root, $args, $context, $info) use ($post_type, $id) {
-      $resolver = new PostObjectConnectionResolver($root, $args, $context, $info, $post_type);
+    return function ($root, $args, $context, $info) use ($post_type_name, $id, $relationship) {
+      $resolver = new PostObjectConnectionResolver($root, $args, $context, $info, $post_type_name);
       $resolver->setQueryArg('relationship', [
-        'to' => $root->ID,
+        $relationship => $root->ID,
         'id' => $id,
       ]);
       // Meta Box does not want post_parent set
@@ -157,23 +160,13 @@ final class WPGraphQL_MB_Relationships
    */
   private function init()
   {
-    add_action('mb_relationships_registered', ['WPGraphQL_MB_Relationships', 'register_connection'], 1);
-  }
-}
+    add_action('mb_relationships_registered', function ($settings) {
+      $to = $settings['to'];
+      $from = $settings['from'];
 
-add_action('mb_relationships_init', 'WPGraphQL_MB_Relationships_init');
-
-if (!function_exists('WPGraphQL_MB_Relationships_init')) {
-  /**
-   * Function that instantiates the plugins main class
-   *
-   * @since 0.0.1
-   */
-  function WPGraphQL_MB_Relationships_init()
-  {
-    /**
-     * Return an instance of the action
-     */
-    return \WPGraphQL_MB_Relationships::instance();
+      if ($to['show_in_graphql'] === true || $from['show_in_graphql'] === true) {
+        WPGraphQL_MB_Relationships::register_connection($settings);
+      }
+    }, 10, 1);
   }
 }
