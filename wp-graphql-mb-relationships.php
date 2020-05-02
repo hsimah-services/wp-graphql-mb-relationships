@@ -60,4 +60,6 @@ if (!class_exists('WPGraphQL_MB_Relationships')) {
 	});
 
 	require_once __DIR__ . '/class-mb-relationships.php';
+  \WPGraphQL_MB_Relationships::instance();
+
 }
