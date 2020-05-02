@@ -18,10 +18,10 @@ MB_Relationships_API::register( [
       'graphql_name' => 'goingUp',
       'graphql_args' => [
         'higher' => [
-					'type' => 'Boolean',
-					'description' => 'Field Description',
-				],
-			],
+	  'type' => 'Boolean',
+	  'description' => 'Field Description',
+         ],
+       ],
       'object_type' => 'post', 
       'post_type'   => 'mypost', 
       'meta_box'    => [
