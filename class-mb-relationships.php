@@ -69,7 +69,7 @@ final class WPGraphQL_MB_Relationships
    * Register single direction
    *
    * @access public
-   * @since  0.0.1
+   * @since  0.3.0
    * @return void
    */
   public static function register_connection($id, $to, $from, $direction)
@@ -88,8 +88,8 @@ final class WPGraphQL_MB_Relationships
             'toType'          => $to_config->graphql_type_name,
             'fromFieldName'   => $from_config->connection_name,
             'connectionArgs'  => isset($from_config->connection_args) ? $from_config->connection_args : [],
-            'resolveNode'     => $resolver->get_node_resolver(),
-            'resolve'         => $resolver->get_resolver($to_config->type_name, $id, $direction),
+            'resolveNode'     => $to_config->resolve !== null ? $to_config->resolve : $resolver->get_node_resolver(),
+            'resolve'         => $to_config->resolve_node !== null ? $to_config->resolve_node : $resolver->get_resolver($to_config->type_name, $id, $direction),
           ]
         );
       }
@@ -114,9 +114,9 @@ final class WPGraphQL_MB_Relationships
     ) {
       WPGraphQL_MB_Relationships::register_connection($settings['id'], $from, $to, 'to');
     }
-    
+
     if ((array_key_exists('show_in_graphql', $from) &&
-    $from['show_in_graphql'] === true)) {
+      $from['show_in_graphql'] === true)) {
       WPGraphQL_MB_Relationships::register_connection($settings['id'], $to, $from, 'from');
     }
   }

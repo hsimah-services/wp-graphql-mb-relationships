@@ -27,6 +27,16 @@ final class WPGraphQL_MB_Relationships_Config
    */
   public $connection_args;
 
+  /**
+   * GraphQL connection resolve function
+   */
+  public $resolve = null;
+
+  /**
+   * GraphQL connection resolve node function
+   */
+  public $resolve_node = null;
+
   function __construct($settings)
   {
     $this->type_name = $settings['field']['post_type'];
@@ -34,8 +44,21 @@ final class WPGraphQL_MB_Relationships_Config
     $this->connection_args = $settings['graphql_args'];
     $this->type_object = get_post_type_object($this->type_name);
     $this->graphql_type_name = $this->type_object->graphql_single_name;
+    if (array_key_exists('resolve', $settings)) {
+      $this->resolve = $settings['resolve'];
+    }
+    if (array_key_exists('resolveNode', $settings)) {
+      $this->resolve_node = $settings['resolveNode'];
+    }
   }
 
+  /**
+   * Register WPGraphQL MB Relationships config.
+   *
+   * @access public
+   * @since  0.3.0
+   * @return void
+   */
   public function should_register()
   {
     return $this->type_object !== null &&
