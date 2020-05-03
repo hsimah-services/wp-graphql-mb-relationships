@@ -3,12 +3,12 @@ WPGraphQL Provider for MB Relationships
 
 This is a simple WPGraphQL integration plugin for Meta Box Relationships. **It only supports post types at the moment.**
 
-You will need to get the latest `master` branch from [MB Relationships](https://github.com/wpmetabox/mb-relationships) as there is a new hook to use.
-
 There are three new fields to add to the API configuration:
  - `show_in_graphql` - a boolean to show the connection in the schema
  - `graphql_name` - the name of the connection field in the schema
  - `graphql_args` - the connection args (optional)
+ - `resolve` - the resolve handler (see WPGraphQL documentation) (experimental)
+ - `resolve_node` - the node resolve handler (see WPGraphQL documentaiton) (experimental)
 
 ```
 MB_Relationships_API::register( [ 
