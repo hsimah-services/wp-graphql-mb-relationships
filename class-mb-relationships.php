@@ -87,7 +87,7 @@ final class WPGraphQL_MB_Relationships
             'fromType'        => $from_config->graphql_type_name,
             'toType'          => $to_config->graphql_type_name,
             'fromFieldName'   => $from_config->connection_name,
-            'connectionArgs'  => isset($from_config->connection_args) ? $from_config->connection_args : [],
+            'connectionArgs'  => $from_config->connection_args,
             'resolveNode'     => $to_config->resolve !== null ? $to_config->resolve : $resolver->get_node_resolver(),
             'resolve'         => $to_config->resolve_node !== null ? $to_config->resolve_node : $resolver->get_resolver($to_config->type_name, $id, $direction),
           ]

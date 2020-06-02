@@ -41,7 +41,7 @@ final class WPGraphQL_MB_Relationships_Config
   {
     $this->type_name = $settings['field']['post_type'];
     $this->connection_name = $settings['graphql_name'];
-    $this->connection_args = $settings['graphql_args'];
+    $this->connection_args = isset( $settings['graphql_args'] ) ? $settings['graphql_args'] : [];
     $this->type_object = get_post_type_object($this->type_name);
     $this->graphql_type_name = $this->type_object->graphql_single_name;
     if (array_key_exists('resolve', $settings)) {
