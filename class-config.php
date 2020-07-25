@@ -79,7 +79,6 @@ final class WPGraphQL_MB_Relationships_Config
     $this->connection_name = $settings['graphql_name'];
     $this->connection_args = isset( $settings['graphql_args'] ) ? $settings['graphql_args'] : [];
     $this->type_object = get_post_type_object($this->type_name);
-    $this->graphql_type_name = $this->type_object->graphql_single_name;
     if (array_key_exists('resolve', $settings)) {
       $this->resolve = $settings['resolve'];
     }
@@ -121,27 +120,6 @@ final class WPGraphQL_MB_Relationships_Config
         //   return new TermObjectConnectionResolver(...$args);
       case 'user':
         return new UserConnectionResolver(...$args);
-    }
-
-    throw new InvariantViolation('Unsupported object_type_name for wpgraphql-mb-relationships');
-  }
-
-  /**
-   * Get applicable node resolver
-   *
-   * @access public
-   * @since  0.4.0
-   * @return void
-   */
-  public function get_node_resolver($node, $context)
-  {
-    switch ($this->object_type_name) {
-      case 'post':
-        return DataSource::resolve_post_object($node->ID, $context);
-        // case 'term':
-        //   return DataSource::resolve_term_object($node->term_id, $context);
-      case 'user':
-        return DataSource::resolve_user($node->userID, $context);
     }
 
     throw new InvariantViolation('Unsupported object_type_name for wpgraphql-mb-relationships');

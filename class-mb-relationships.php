@@ -88,7 +88,6 @@ final class WPGraphQL_MB_Relationships
             'toType'          => $to_config->graphql_type_name,
             'fromFieldName'   => $from_config->connection_name,
             'connectionArgs'  => isset($from_config->connection_args) ? $from_config->connection_args : [],
-            'resolveNode'     => $to_config->resolve !== null ? $to_config->resolve : $resolver->get_node_resolver($to_config),
             'resolve'         => $to_config->resolve_node !== null ? $to_config->resolve_node : $resolver->get_resolver($to_config, $id, $direction),
           ]
         );
@@ -119,20 +118,6 @@ final class WPGraphQL_MB_Relationships
       $from['show_in_graphql'] === true)) {
       WPGraphQL_MB_Relationships::register_connection($settings['id'], $to, $from, 'from');
     }
-  }
-
-  /**
-   * Get resolve node callback
-   *
-   * @access private
-   * @since  0.1.0
-   * @return function
-   */
-  protected function get_node_resolver($config)
-  {
-    return function ($node, $args, $context, $info) use ($config) {
-      return !empty($node) ? $config->get_node_resolver($node, $context) : null;
-    };
   }
 
   /**
