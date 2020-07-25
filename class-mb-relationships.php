@@ -87,9 +87,8 @@ final class WPGraphQL_MB_Relationships
             'fromType'        => $from_config->graphql_type_name,
             'toType'          => $to_config->graphql_type_name,
             'fromFieldName'   => $from_config->connection_name,
-            'connectionArgs'  => $from_config->connection_args,
-            'resolveNode'     => $to_config->resolve !== null ? $to_config->resolve : $resolver->get_node_resolver(),
-            'resolve'         => $to_config->resolve_node !== null ? $to_config->resolve_node : $resolver->get_resolver($to_config->type_name, $id, $direction),
+            'connectionArgs'  => isset($from_config->connection_args) ? $from_config->connection_args : [],
+            'resolve'         => $to_config->resolve_node !== null ? $to_config->resolve_node : $resolver->get_resolver($to_config, $id, $direction),
           ]
         );
       }
@@ -122,36 +121,20 @@ final class WPGraphQL_MB_Relationships
   }
 
   /**
-   * Get resolve node callback
-   *
-   * @access private
-   * @since  0.1.0
-   * @return function
-   */
-  protected function get_node_resolver()
-  {
-    return function ($node, $args, $context, $info) {
-      return !empty($node) ? DataSource::resolve_post_object($node->ID, $context) : null;
-    };
-  }
-
-  /**
    * Get resolve callback
    *
    * @access private
    * @since  0.1.0
    * @return function
    */
-  protected function get_resolver($post_type_name, $id, $relationship)
+  protected function get_resolver($config, $id, $relationship)
   {
-    return function ($root, $args, $context, $info) use ($post_type_name, $id, $relationship) {
-      $resolver = new PostObjectConnectionResolver($root, $args, $context, $info, $post_type_name);
+    return function ($root, $args, $context, $info) use ($config, $id, $relationship) {
+      $resolver = $config->get_resolver($root, $args, $context, $info, $config->type_name);
       $resolver->setQueryArg('relationship', [
         $relationship => $root->ID,
         'id' => $id,
       ]);
-      // Meta Box does not want post_parent set
-      $resolver->setQueryArg('post_parent', null);
 
       return $resolver->get_connection();
     };
