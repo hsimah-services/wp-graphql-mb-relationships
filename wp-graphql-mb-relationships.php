@@ -6,14 +6,14 @@
  * Description: WP GraphQL provider for MB Relationships
  * Author: hsimah
  * Author URI: http://www.hsimah.com
- * Version: 0.3.0
+ * Version: 0.4.0
  * Text Domain: wpgraphql-mb-relationships
  * License: GPL-3
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  *
  * @package  WPGraphQL_MB_Relationships
  * @author   hsimah
- * @version  0.3.0
+ * @version  0.4.0
  */
 
 // Exit if accessed directly.
@@ -26,7 +26,7 @@ if (!class_exists('WPGraphQL_MB_Relationships')) {
 	add_action('admin_init', function () {
 		$min_versions = [
 			'wpgraphql' => '0.8.1',
-			'metabox'		=> '5.2.10',
+			'metabox'		=> '1.10.3',
 		];
 		
 		if (
